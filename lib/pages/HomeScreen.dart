@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:practiceflutter/components/appbar_custom.dart';
+import 'package:practiceflutter/components/sensorList.dart';
 import 'package:practiceflutter/models/Sensor.dart';
 import 'package:practiceflutter/services/SensorService.dart';
 
@@ -20,7 +21,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _fechaController = TextEditingController();
   final TextEditingController _horaController = TextEditingController();
   final TextEditingController _valorController = TextEditingController();
-
+  final TextEditingController _searchController = TextEditingController();
+  List<Sensor> _allSensors = []; // Lista completa de sentidos
+  List<Sensor> _filteredSensors = []; // Lista de sentidos filtrados
   Future<void> _selectDate() async {
     DateTime? _picked = await showDatePicker(
       context: context,
@@ -48,6 +51,23 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+
+void _filterSensors(String query) {
+  setState(() {
+    if (query.isEmpty) {
+      _filteredSensors = _allSensors; // Si no hay filtro, mostrar todos los sensores
+    } else {
+      _filteredSensors = _allSensors.where((sensor) {
+        return sensor.idSensor.toLowerCase().contains(query.toLowerCase().trim()) ||
+            sensor.fecha.toLowerCase().contains(query.toLowerCase().trim()) ||
+            sensor.hora.toLowerCase().contains(query.toLowerCase().trim()) ||
+            sensor.valor.toString().toLowerCase().contains(query.toLowerCase().trim());
+      }).toList();
+    }
+  });
+}
+
+
 
   // Method to show Add/Edit Sensor Dialog
   void _showSensorDialog({Sensor? existingSensor}) {
@@ -106,11 +126,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         TextField(
                           controller: _idSensorController,
                           decoration: const InputDecoration(
-
                             labelText: 'Sensor ID',
                             helperText: 'Ingresa un ID para el sensor',
-                       
-                            
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -212,68 +229,60 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            const AppbarCustom(),
-            const SizedBox(height: 10),
-            // Using FutureBuilder to load the sensor data from Firestore
-            Expanded(
-              child: FutureBuilder<List<Sensor>>(
-                future: _sensorService.getSensores(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('No sensors found'));
-                  } else {
-                    final sensors = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: sensors.length,
-                      itemBuilder: (context, index) {
-                        final sensor = sensors[index];
-                        return ListTile(
-                          title: Text('Sensor ID: ${sensor.idSensor}'),
-                          subtitle: Text(
-                              'Fecha: ${sensor.fecha}, Hora: ${sensor.hora}, Valor: ${sensor.valor}'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () =>
-                                    _showSensorDialog(existingSensor: sensor),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () => _deleteSensor(sensor),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  }
-                },
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              const AppbarCustom(),
+              TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  labelText: 'Buscar sensor',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: _filterSensors,
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              // Using FutureBuilder to load the sensor data from Firestore
+              Expanded(
+                child: FutureBuilder<List<Sensor>>(
+                  future: _sensorService.getSensores(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No se encontrarion sensores'));
+                    } else {
+                      _allSensors =
+                          snapshot.data!; // Asignar los sensores obtenidos
+                    // Al cargar, mostramos todos los sensores
+
+                      return SensorList(
+                      sensors: _filteredSensors.isEmpty ? _allSensors : _filteredSensors, // Mostrar los sensores filtrados o todos si no hay filtro
+                        onEdit: (sensor) =>
+                            _showSensorDialog(existingSensor: sensor),
+                        onDelete: _deleteSensor,
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-    floatingActionButton: FloatingActionButton(
-      backgroundColor: Colors.black,
-      onPressed: () => _showSensorDialog(),
-      child: const Icon(Icons.add, color: Colors.white),
-    ),
-  );
-}
-
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black,
+        onPressed: () => _showSensorDialog(),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
 }
