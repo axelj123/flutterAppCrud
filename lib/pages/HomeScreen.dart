@@ -212,56 +212,68 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Get the list of sensors from the service
-    final sensors = _sensorService.getSensores();
-
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              const AppbarCustom(),
-              const SizedBox(height: 10),
-              // Replace SensorList with a ListView if needed
-              Expanded(
-                child: ListView.builder(
-                  itemCount: sensors.length,
-                  itemBuilder: (context, index) {
-                    final sensor = sensors[index];
-                    return ListTile(
-                      title: Text('Sensor ID: ${sensor.idSensor}'),
-                      subtitle: Text(
-                          'Fecha: ${sensor.fecha}, Hora: ${sensor.hora}, Valor: ${sensor.valor}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () =>
-                                _showSensorDialog(existingSensor: sensor),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            const AppbarCustom(),
+            const SizedBox(height: 10),
+            // Using FutureBuilder to load the sensor data from Firestore
+            Expanded(
+              child: FutureBuilder<List<Sensor>>(
+                future: _sensorService.getSensores(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No sensors found'));
+                  } else {
+                    final sensors = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: sensors.length,
+                      itemBuilder: (context, index) {
+                        final sensor = sensors[index];
+                        return ListTile(
+                          title: Text('Sensor ID: ${sensor.idSensor}'),
+                          subtitle: Text(
+                              'Fecha: ${sensor.fecha}, Hora: ${sensor.hora}, Valor: ${sensor.valor}'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () =>
+                                    _showSensorDialog(existingSensor: sensor),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () => _deleteSensor(sensor),
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _deleteSensor(sensor),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     );
-                  },
-                ),
+                  }
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
-        onPressed: () => _showSensorDialog(),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
+    ),
+    floatingActionButton: FloatingActionButton(
+      backgroundColor: Colors.black,
+      onPressed: () => _showSensorDialog(),
+      child: const Icon(Icons.add, color: Colors.white),
+    ),
+  );
+}
+
 }

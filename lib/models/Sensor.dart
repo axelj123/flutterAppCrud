@@ -14,4 +14,15 @@ class Sensor {
     required this.hora,
     required this.valor,
   });
+
+  factory Sensor.fromFirestore(Map<String, dynamic> firestoreData,String id){
+    return Sensor(
+      id:id,
+      idSensor: firestoreData ['idSensor'],
+      fecha: firestoreData ['fecha'],
+      hora:firestoreData['hora'],
+      valor:firestoreData['valor'],
+    );
+  }
+
 }
