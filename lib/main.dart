@@ -18,12 +18,10 @@ void main() async {
     ),
   );
 
-  // Configura la persistencia de Firestore
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
   );
 
-  // Inicia la aplicación
   runApp(const MyApp());
 }
 
