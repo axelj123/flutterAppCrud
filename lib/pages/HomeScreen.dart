@@ -16,14 +16,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final SensorService _sensorService = SensorService();
 
-  // Controllers for sensor input fields
   final TextEditingController _idSensorController = TextEditingController();
   final TextEditingController _fechaController = TextEditingController();
   final TextEditingController _horaController = TextEditingController();
   final TextEditingController _valorController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
-  List<Sensor> _allSensors = []; // Lista completa de sentidos
-  List<Sensor> _filteredSensors = []; // Lista de sentidos filtrados
+  List<Sensor> _allSensors = []; 
+  List<Sensor> _filteredSensors = []; 
   Future<void> _selectDate() async {
     DateTime? _picked = await showDatePicker(
       context: context,
@@ -46,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (pickedTime != null) {
       setState(() {
-        // Format the time as a string
         _horaController.text = pickedTime.format(context);
       });
     }
@@ -55,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
 void _filterSensors(String query) {
   setState(() {
     if (query.isEmpty) {
-      _filteredSensors = _allSensors; // Si no hay filtro, mostrar todos los sensores
+      _filteredSensors = _allSensors; 
     } else {
       _filteredSensors = _allSensors.where((sensor) {
         return sensor.idSensor.toLowerCase().contains(query.toLowerCase().trim()) ||
@@ -69,16 +67,14 @@ void _filterSensors(String query) {
 
 
 
-  // Method to show Add/Edit Sensor Dialog
   void _showSensorDialog({Sensor? existingSensor}) {
-    // If editing an existing sensor, pre-fill the controllers
     if (existingSensor != null) {
       _idSensorController.text = existingSensor.idSensor;
       _fechaController.text = existingSensor.fecha;
       _horaController.text = existingSensor.hora;
       _valorController.text = existingSensor.valor.toString();
     } else {
-      // Clear controllers for new sensor
+ 
       _idSensorController.clear();
       _fechaController.clear();
       _horaController.clear();
@@ -95,7 +91,7 @@ void _filterSensors(String query) {
           ),
         );
         return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.7, // Ajusta la altura
+          height: MediaQuery.of(context).size.height * 0.7, 
           child: DecoratedBox(
             decoration: const BoxDecoration(
               color: Color.fromARGB(255, 255, 255, 255),
@@ -166,10 +162,10 @@ void _filterSensors(String query) {
                               },
                               style: TextButton.styleFrom(
                                 foregroundColor:
-                                    Colors.red, // Establece el color del texto
+                                    Colors.red,
                               ),
                               child: const Text(
-                                  'Cancel'), // El 'child' está al final
+                                  'Cancel'), 
                             ),
                             const SizedBox(width: 10),
                             ElevatedButton(
@@ -248,7 +244,6 @@ void _filterSensors(String query) {
                 onChanged: _filterSensors,
               ),
               const SizedBox(height: 10),
-              // Using FutureBuilder to load the sensor data from Firestore
               Expanded(
                 child: FutureBuilder<List<Sensor>>(
                   future: _sensorService.getSensores(),
@@ -261,11 +256,10 @@ void _filterSensors(String query) {
                       return const Center(child: Text('No se encontrarion sensores'));
                     } else {
                       _allSensors =
-                          snapshot.data!; // Asignar los sensores obtenidos
-                    // Al cargar, mostramos todos los sensores
+                          snapshot.data!; 
 
                       return SensorList(
-                      sensors: _filteredSensors.isEmpty ? _allSensors : _filteredSensors, // Mostrar los sensores filtrados o todos si no hay filtro
+                      sensors: _filteredSensors.isEmpty ? _allSensors : _filteredSensors, 
                         onEdit: (sensor) =>
                             _showSensorDialog(existingSensor: sensor),
                         onDelete: _deleteSensor,

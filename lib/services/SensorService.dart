@@ -4,14 +4,14 @@ import 'package:practiceflutter/models/Sensor.dart';
 class SensorService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Leer sensores desde Firestore:
+//obtener sensores
  Future<List<Sensor>> getSensores() async {
   try {
     QuerySnapshot snapshot = await _firestore.collection('sensores').get();
-    print('Total documents fetched: ${snapshot.docs.length}'); // Verifica la cantidad de documentos
+    print('Total documents fetched: ${snapshot.docs.length}'); 
     List<Sensor> sensores = snapshot.docs.map((doc) {
       return Sensor(
-        id: doc.id, // ID del documento
+        id: doc.id, 
         idSensor: doc['idSensor'],
         fecha: doc['fecha'],
         hora: doc['hora'],
@@ -25,11 +25,9 @@ class SensorService {
   }
 }
 
-
-  // Agregar un nuevo sensor a Firestore:
+//registrar sensor
 Future<void> addSensor(Sensor sensor) async {
   try {
-    // Primero agrega el sensor a Firestore
     await _firestore.collection('sensores').add({
       'idSensor': sensor.idSensor,
       'fecha': sensor.fecha,

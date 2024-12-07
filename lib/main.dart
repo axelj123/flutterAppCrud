@@ -5,19 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:practiceflutter/firebase_options.dart';
 import 'package:practiceflutter/pages/HomeScreen.dart';
 void main() async {
-  // Asegúrate de inicializar los bindings antes de cualquier otra cosa
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializa Firebase con las opciones de la plataforma actual
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Configura la apariencia de la barra de estado
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: Color.fromARGB(255, 255, 255, 255), // Barra de estado transparente
-      statusBarIconBrightness: Brightness.dark, // Íconos de la barra de estado oscuros
+      statusBarColor: Color.fromARGB(255, 255, 255, 255), 
+      statusBarIconBrightness: Brightness.dark, 
     ),
   );
 
