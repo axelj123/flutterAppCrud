@@ -274,7 +274,9 @@ void _filterSensors(String query) {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.black,
+        mini: true,
         onPressed: () => _showSensorDialog(),
+        
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
