@@ -15,7 +15,7 @@ class SensorService {
         idSensor: doc['idSensor'],
         fecha: doc['fecha'],
         hora: doc['hora'],
-        valor: doc['valor'],
+        valor: doc['valor'],    
       );
     }).toList();
     return sensores;
@@ -23,6 +23,19 @@ class SensorService {
     print('Error fetching sensors: $e');
     throw Exception('Error al obtener sensores: $e');
   }
+}
+Stream<List<Sensor>> streamSensores() {
+  return _firestore.collection('sensores').snapshots().map((snapshot) {
+    return snapshot.docs.map((doc) {
+      return Sensor(
+        id: doc.id,
+        idSensor: doc['idSensor'],
+        fecha: doc['fecha'],
+        hora: doc['hora'],
+        valor: doc['valor'],
+      );
+    }).toList();
+  });
 }
 
 //registrar sensor

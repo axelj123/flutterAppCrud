@@ -21,8 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _horaController = TextEditingController();
   final TextEditingController _valorController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
-  List<Sensor> _allSensors = []; 
-  List<Sensor> _filteredSensors = []; 
+  List<Sensor> _allSensors = [];
+  List<Sensor> _filteredSensors = [];
   Future<void> _selectDate() async {
     DateTime? _picked = await showDatePicker(
       context: context,
@@ -50,22 +50,25 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-void _filterSensors(String query) {
-  setState(() {
-    if (query.isEmpty) {
-      _filteredSensors = _allSensors; 
-    } else {
-      _filteredSensors = _allSensors.where((sensor) {
-        return sensor.idSensor.toLowerCase().contains(query.toLowerCase().trim()) ||
-            sensor.fecha.toLowerCase().contains(query.toLowerCase().trim()) ||
-            sensor.hora.toLowerCase().contains(query.toLowerCase().trim()) ||
-            sensor.valor.toString().toLowerCase().contains(query.toLowerCase().trim());
-      }).toList();
-    }
-  });
-}
-
-
+  void _filterSensors(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredSensors = _allSensors;
+      } else {
+        _filteredSensors = _allSensors.where((sensor) {
+          return sensor.idSensor
+                  .toLowerCase()
+                  .contains(query.toLowerCase().trim()) ||
+              sensor.fecha.toLowerCase().contains(query.toLowerCase().trim()) ||
+              sensor.hora.toLowerCase().contains(query.toLowerCase().trim()) ||
+              sensor.valor
+                  .toString()
+                  .toLowerCase()
+                  .contains(query.toLowerCase().trim());
+        }).toList();
+      }
+    });
+  }
 
   void _showSensorDialog({Sensor? existingSensor}) {
     if (existingSensor != null) {
@@ -74,7 +77,6 @@ void _filterSensors(String query) {
       _horaController.text = existingSensor.hora;
       _valorController.text = existingSensor.valor.toString();
     } else {
- 
       _idSensorController.clear();
       _fechaController.clear();
       _horaController.clear();
@@ -91,7 +93,7 @@ void _filterSensors(String query) {
           ),
         );
         return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.7, 
+          height: MediaQuery.of(context).size.height * 0.7,
           child: DecoratedBox(
             decoration: const BoxDecoration(
               color: Color.fromARGB(255, 255, 255, 255),
@@ -102,114 +104,108 @@ void _filterSensors(String query) {
             ),
             child: Padding(
               padding: MediaQuery.of(context).viewInsets,
-              child: Wrap(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          existingSensor == null
-                              ? "Registrar Sensor"
-                              : "Editar Sensor",
-                          style: const TextStyle(
-                              color: Color.fromARGB(255, 0, 0, 0),
-                              fontSize: 20),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        existingSensor == null
+                            ? "Registrar Sensor"
+                            : "Editar Sensor",
+                        style: const TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _idSensorController,
+                        decoration: const InputDecoration(
+                          labelText: 'Sensor ID',
+                          helperText: 'Ingresa un ID para el sensor',
                         ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _idSensorController,
-                          decoration: const InputDecoration(
-                            labelText: 'Sensor ID',
-                            helperText: 'Ingresa un ID para el sensor',
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _fechaController,
+                        decoration: const InputDecoration(
+                            labelText: 'Fecha',
+                            helperText: 'Selecciona una fecha'),
+                        readOnly: true,
+                        onTap: _selectDate,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _horaController,
+                        decoration: const InputDecoration(
+                            labelText: 'Hora',
+                            helperText: 'Selecciona un horario'),
+                        readOnly: true,
+                        onTap: _selectTime,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _valorController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                            labelText: 'Valor', helperText: 'Ingresa el valor'),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
+                            child: const Text('Cancel'),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _fechaController,
-                          decoration: const InputDecoration(
-                              labelText: 'Fecha',
-                              helperText: 'Selecciona una fecha'),
-                          readOnly: true,
-                          onTap: _selectDate,
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _horaController,
-                          decoration: const InputDecoration(
-                              labelText: 'Hora',
-                              helperText: 'Selecciona un horario'),
-                          readOnly: true,
-                          onTap: _selectTime,
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _valorController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                              labelText: 'Valor',
-                              helperText: 'Ingresa el valor'),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () {
+                          const SizedBox(width: 10),
+                          ElevatedButton(
+                            onPressed: () {
+                              // Validate inputs
+                              if (_idSensorController.text.isNotEmpty &&
+                                  _fechaController.text.isNotEmpty &&
+                                  _horaController.text.isNotEmpty &&
+                                  _valorController.text.isNotEmpty) {
+                                // Create or update sensor
+                                final sensor = Sensor(
+                                  id: existingSensor?.id ??
+                                      Random().nextInt(10000).toString(),
+                                  idSensor: _idSensorController.text,
+                                  fecha: _fechaController.text,
+                                  hora: _horaController.text,
+                                  valor: int.parse(_valorController.text),
+                                );
+
+                                setState(() {
+                                  if (existingSensor == null) {
+                                    // Add new sensor
+                                    _sensorService.addSensor(sensor);
+                                  } else {
+                                    // Update existing sensor
+                                    _sensorService.updateSensor(
+                                        existingSensor.id, sensor);
+                                  }
+                                });
+
                                 Navigator.of(context).pop();
-                              },
-                              style: TextButton.styleFrom(
-                                foregroundColor:
-                                    Colors.red,
-                              ),
-                              child: const Text(
-                                  'Cancel'), 
+                              }
+                            },
+                            child: Text(
+                              existingSensor == null ? 'Add' : 'Update',
+                              style: const TextStyle(color: Colors.black),
                             ),
-                            const SizedBox(width: 10),
-                            ElevatedButton(
-                              onPressed: () {
-                                // Validate inputs
-                                if (_idSensorController.text.isNotEmpty &&
-                                    _fechaController.text.isNotEmpty &&
-                                    _horaController.text.isNotEmpty &&
-                                    _valorController.text.isNotEmpty) {
-                                  // Create or update sensor
-                                  final sensor = Sensor(
-                                    id: existingSensor?.id ??
-                                        Random().nextInt(10000).toString(),
-                                    idSensor: _idSensorController.text,
-                                    fecha: _fechaController.text,
-                                    hora: _horaController.text,
-                                    valor: int.parse(_valorController.text),
-                                  );
-
-                                  setState(() {
-                                    if (existingSensor == null) {
-                                      // Add new sensor
-                                      _sensorService.addSensor(sensor);
-                                    } else {
-                                      // Update existing sensor
-                                      _sensorService.updateSensor(
-                                          existingSensor.id, sensor);
-                                    }
-                                  });
-
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              child: Text(
-                                existingSensor == null ? 'Add' : 'Update',
-                                style: const TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -245,27 +241,33 @@ void _filterSensors(String query) {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: FutureBuilder<List<Sensor>>(
-                  future: _sensorService.getSensores(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No se encontrarion sensores'));
-                    } else {
-                      _allSensors =
-                          snapshot.data!; 
+                child: RefreshIndicator(
+                  onRefresh: _reloadSensors,
+                  child: FutureBuilder<List<Sensor>>(
+                    future: _sensorService.getSensores(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(
+                          child: Text('No se encontraron sensores'),
+                        );
+                      } else {
+                        _allSensors = snapshot.data!;
 
-                      return SensorList(
-                      sensors: _filteredSensors.isEmpty ? _allSensors : _filteredSensors, 
-                        onEdit: (sensor) =>
-                            _showSensorDialog(existingSensor: sensor),
-                        onDelete: _deleteSensor,
-                      );
-                    }
-                  },
+                        return SensorList(
+                          sensors: _filteredSensors.isEmpty
+                              ? _allSensors
+                              : _filteredSensors,
+                          onEdit: (sensor) =>
+                              _showSensorDialog(existingSensor: sensor),
+                          onDelete: _deleteSensor,
+                        );
+                      }
+                    },
+                  ),
                 ),
               ),
             ],
@@ -276,9 +278,16 @@ void _filterSensors(String query) {
         backgroundColor: Colors.black,
         mini: true,
         onPressed: () => _showSensorDialog(),
-        
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
+  }
+
+  Future<void> _reloadSensors() async {
+    final sensoresActualizados = await _sensorService.getSensores();
+    setState(() {
+      _allSensors = sensoresActualizados;
+      _filterSensors(_searchController.text); // Mantén el filtro si está activo
+    });
   }
 }
