@@ -220,74 +220,60 @@ class _HomeScreenState extends State<HomeScreen> {
       _sensorService.deleteSensor(sensor.id);
     });
   }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              const AppbarCustom(),
-              TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  labelText: 'Buscar sensor',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: _filterSensors,
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            const AppbarCustom(),
+            TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                labelText: 'Buscar sensor',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _reloadSensors,
-                  child: FutureBuilder<List<Sensor>>(
-                    future: _sensorService.getSensores(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(
-                          child: Text('No se encontraron sensores'),
-                        );
-                      } else {
-                        _allSensors = snapshot.data!;
+              onChanged: _filterSensors, // Filtrar cuando el texto cambie
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: StreamBuilder<List<Sensor>>(
+                stream: _sensorService.streamSensores(), // Usar streamSensores() para escuchar cambios en tiempo real
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No se encontraron sensores'));
+                  } else {
+                    _allSensors = snapshot.data!; // Guardamos los sensores obtenidos en _allSensors
 
-                        return SensorList(
-                          sensors: _filteredSensors.isEmpty
-                              ? _allSensors
-                              : _filteredSensors,
-                          onEdit: (sensor) =>
-                              _showSensorDialog(existingSensor: sensor),
-                          onDelete: _deleteSensor,
-                        );
-                      }
-                    },
-                  ),
-                ),
+                    // Filtrar los sensores si el campo de búsqueda no está vacío
+                    List<Sensor> sensorsToShow = _filteredSensors.isEmpty ? _allSensors : _filteredSensors;
+
+                    return SensorList(
+                      sensors: sensorsToShow,
+                      onEdit: (sensor) => _showSensorDialog(existingSensor: sensor),
+                      onDelete: _deleteSensor,
+                    );
+                  }
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
-        mini: true,
-        onPressed: () => _showSensorDialog(),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
-
-  Future<void> _reloadSensors() async {
-    final sensoresActualizados = await _sensorService.getSensores();
-    setState(() {
-      _allSensors = sensoresActualizados;
-      _filterSensors(_searchController.text); // Mantén el filtro si está activo
-    });
-  }
+    ),
+    floatingActionButton: FloatingActionButton(
+      backgroundColor: Colors.black,
+      mini: true,
+      onPressed: () => _showSensorDialog(), 
+      child: const Icon(Icons.add, color: Colors.white),
+    ),
+  );
+}
 }
